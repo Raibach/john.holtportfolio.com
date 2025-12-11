@@ -29,7 +29,7 @@ define( 'DB_USER', getenv('MYSQLUSER') ?: getenv('WORDPRESS_DB_USER') ?: 'root' 
 
 /** Database password */
 $db_password = getenv('MYSQL_ROOT_PASSWORD') ?: getenv('MYSQLPASSWORD') ?: getenv('WORDPRESS_DB_PASSWORD');
-define( 'DB_PASSWORD', $db_password ?: 'EAEAuwZrDfldCsVlILORIlRNrUqjTIPT' );
+define( 'DB_PASSWORD', $db_password ?: 'EAEAuwZrDfldCsVlILoRIlRNrUqjTIPT' );
 
 /** Database hostname - Railway internal network */
 $db_host = 'mysql.railway.internal:3306';
