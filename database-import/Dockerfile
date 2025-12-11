@@ -1,4 +1,4 @@
-FROM mysql:8.0
+FROM debian:bullseye-slim
 
 # Install mysql client
 RUN apt-get update && apt-get install -y mysql-client && rm -rf /var/lib/apt/lists/*
