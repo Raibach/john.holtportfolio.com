@@ -2,13 +2,16 @@
 public_html/*
 !public_html/wp-content/
 
-# Within wp-content, exclude generated content (but include uploads for images)
+# Within wp-content, exclude generated content but include uploads
 public_html/wp-content/upgrade/
 public_html/wp-content/upgrade-temp-backup/
 public_html/wp-content/backup-db/
 public_html/wp-content/backups/
 public_html/wp-content/cache/
+public_html/wp-content/litespeed/
 public_html/wp-content/debug.log
+public_html/wp-content/siteground-migrator.log
+public_html/wp-content/object-cache-socket-missing.php
 # Exclude log files from uploads folder
 public_html/wp-content/uploads/wc-logs/
 public_html/wp-content/uploads/*.log
@@ -41,3 +44,9 @@ error_log
 # Sensitive files
 public_html/wp-content/sgs_encrypt_key.php
 
+# Other directories
+logs/
+webstats/
+
+# Include database folder for import
+!database/
