@@ -2,14 +2,16 @@
 public_html/*
 !public_html/wp-content/
 
-# Within wp-content, exclude uploads and generated content
-public_html/wp-content/uploads/
+# Within wp-content, exclude generated content (but include uploads for images)
 public_html/wp-content/upgrade/
 public_html/wp-content/upgrade-temp-backup/
 public_html/wp-content/backup-db/
 public_html/wp-content/backups/
 public_html/wp-content/cache/
 public_html/wp-content/debug.log
+# Exclude log files from uploads folder
+public_html/wp-content/uploads/wc-logs/
+public_html/wp-content/uploads/*.log
 
 # OS files
 .DS_Store
