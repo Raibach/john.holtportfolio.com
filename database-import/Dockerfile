@@ -26,13 +26,13 @@ if [ -n "$MYSQL_PRIVATE_URL" ]; then\n\
   DB="${PORT_DB#*/}"\n\
   echo "Connecting as $USER to $HOST:$PORT/$DB"\n\
   echo "Dropping existing tables first..."\n\
-  mysql -h "$HOST" -P "$PORT" -u "$USER" -p"$PASS" "$DB" -e "SET FOREIGN_KEY_CHECKS=0; SET @tables = NULL; SELECT GROUP_CONCAT(table_name) INTO @tables FROM information_schema.tables WHERE table_schema = '$DB'; SET @tables = CONCAT('DROP TABLE IF EXISTS ', @tables); PREPARE stmt FROM @tables; EXECUTE stmt; DEALLOCATE PREPARE stmt; SET FOREIGN_KEY_CHECKS=1;" 2>&1 || echo "No tables to drop or error dropping"\n\
+  mysql -h "$HOST" -P "$PORT" -u "$USER" -p"$PASS" "$DB" -e "SET FOREIGN_KEY_CHECKS=0; SET @tables = NULL; SELECT GROUP_CONCAT('\\\`', table_name, '\\\`') INTO @tables FROM information_schema.tables WHERE table_schema = '$DB'; SELECT IFNULL(@tables, '') INTO @tables; SET @tables = IF(@tables != '', CONCAT('DROP TABLE IF EXISTS ', @tables), 'SELECT 1'); PREPARE stmt FROM @tables; EXECUTE stmt; DEALLOCATE PREPARE stmt; SET FOREIGN_KEY_CHECKS=1;" 2>&1 || echo "No tables to drop or error dropping"\n\
   echo "Importing database..."\n\
   mysql -h "$HOST" -P "$PORT" -u "$USER" -p"$PASS" "$DB" < /tmp/import.sql\n\
 elif [ -n "$MYSQL_ROOT_PASSWORD" ]; then\n\
   echo "Using MYSQL_ROOT_PASSWORD..."\n\
   echo "Dropping existing tables first..."\n\
-  mysql -h mysql.railway.internal -P 3306 -u root -p"$MYSQL_ROOT_PASSWORD" railway -e "SET FOREIGN_KEY_CHECKS=0; SET @tables = NULL; SELECT GROUP_CONCAT(table_name) INTO @tables FROM information_schema.tables WHERE table_schema = 'railway'; SET @tables = CONCAT('DROP TABLE IF EXISTS ', @tables); PREPARE stmt FROM @tables; EXECUTE stmt; DEALLOCATE PREPARE stmt; SET FOREIGN_KEY_CHECKS=1;" 2>&1 || echo "No tables to drop"\n\
+  mysql -h mysql.railway.internal -P 3306 -u root -p"$MYSQL_ROOT_PASSWORD" railway -e "SET FOREIGN_KEY_CHECKS=0; SET @tables = NULL; SELECT GROUP_CONCAT('\\\`', table_name, '\\\`') INTO @tables FROM information_schema.tables WHERE table_schema = 'railway'; SELECT IFNULL(@tables, '') INTO @tables; SET @tables = IF(@tables != '', CONCAT('DROP TABLE IF EXISTS ', @tables), 'SELECT 1'); PREPARE stmt FROM @tables; EXECUTE stmt; DEALLOCATE PREPARE stmt; SET FOREIGN_KEY_CHECKS=1;" 2>&1 || echo "No tables to drop"\n\
   echo "Importing database..."\n\
   mysql -h mysql.railway.internal -P 3306 -u root -p"$MYSQL_ROOT_PASSWORD" railway < /tmp/import.sql\n\
 else\n\
