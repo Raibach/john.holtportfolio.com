@@ -90,7 +90,8 @@ $table_prefix = 'bk2v_';
 
 /* Add any custom values between this line and the "stop editing" line. */
 
-
+/** Allow WordPress to repair database */
+define('WP_ALLOW_REPAIR', true);
 
 /**
  * For developers: WordPress debugging mode.
