@@ -13,5 +13,21 @@ if [ -z "$HOST" ] || [ -z "$PORT" ] || [ -z "$USER" ] || [ -z "$PASS" ] || [ -z 
     exit 1
 fi
 
-# Execute the drop-tables SQL script
-mysql -h "$HOST" -P "$PORT" -u "$USER" -p"$PASS" "$DB" < /drop-tables.sql 2>&1
+echo "Dropping all tables in database: $DB"
+
+# Use a more reliable method to drop all tables
+mysql -h "$HOST" -P "$PORT" -u "$USER" -p"$PASS" "$DB" <<EOF 2>&1
+SET FOREIGN_KEY_CHECKS=0;
+SET @tables = NULL;
+SELECT GROUP_CONCAT(CONCAT('DROP TABLE IF EXISTS \`', table_name, '\`')) INTO @tables
+FROM information_schema.tables
+WHERE table_schema = '$DB';
+SET @tables = IFNULL(@tables, '');
+SET @tables = IF(@tables != '', @tables, 'SELECT 1');
+PREPARE stmt FROM @tables;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+SET FOREIGN_KEY_CHECKS=1;
+EOF
+
+exit $?
