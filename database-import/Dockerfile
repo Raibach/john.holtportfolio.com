@@ -10,17 +10,20 @@ COPY database/dbxgdxdldly759.sql /tmp/import.sql
 RUN echo '#!/bin/bash\n\
 echo "🚀 Starting database import..."\n\
 echo "Connecting to MySQL at mysql.railway.internal:3306"\n\
+echo "Password set: ${MYSQL_ROOT_PASSWORD:+YES}"\n\
 sleep 5\n\
 mysql -h mysql.railway.internal \\\n\
       -P 3306 \\\n\
       -u root \\\n\
-      -p"${MYSQL_ROOT_PASSWORD}" \\\n\
+      -p"${MYSQL_ROOT_PASSWORD:-EAEAuwZrDfldCsVlILORIlRNrUqjTIPT}" \\\n\
       railway < /tmp/import.sql\n\
 if [ $? -eq 0 ]; then\n\
   echo "✅ Database imported successfully!"\n\
   echo "You can now delete this import service."\n\
 else\n\
   echo "❌ Import failed!"\n\
+  echo "Trying alternative connection..."\n\
+  mysql -h mysql.railway.internal -P 3306 -u root -p"${MYSQL_ROOT_PASSWORD:-EAEAuwZrDfldCsVlILORIlRNrUqjTIPT}" -e "SELECT 1;" 2>&1\n\
   exit 1\n\
 fi\n\
 sleep 3600\n\
