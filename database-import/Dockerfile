@@ -11,7 +11,7 @@ RUN chmod +x /drop-tables.sh
 
 # Create import script
 RUN echo '#!/bin/bash\n\
-set -e\n\
+set +e\n\
 echo "🚀 Starting database import..."\n\
 echo "Deployment triggered at $(date)"\n\
 sleep 5\n\
