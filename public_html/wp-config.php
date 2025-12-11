@@ -29,8 +29,8 @@ define( 'DB_USER', 'root' );
 /** Database password */
 define( 'DB_PASSWORD', 'EAEAuwZrDfldCsVlILoRIlRNrUqjTIPT' );
 
-/** Database hostname - Railway MySQL service */
-define( 'DB_HOST', 'tramway.proxy.rlwy.net:24429' );
+/** Database hostname - Railway internal network (use internal hostname for services in same project) */
+define( 'DB_HOST', 'mysql.railway.internal:3306' );
 
 /** Show database connection errors */
 define( 'WP_DEBUG', true );
