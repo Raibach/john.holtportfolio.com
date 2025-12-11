@@ -3,13 +3,16 @@ FROM debian:bullseye-slim
 # Install mysql client
 RUN apt-get update && apt-get install -y default-mysql-client && rm -rf /var/lib/apt/lists/*
 
-# Copy SQL files from repository
+# Copy SQL files and scripts from repository
 COPY database/dbxgdxdldly759.sql /tmp/import.sql
-COPY database-import/drop-tables.sql /tmp/drop-tables.sql
+COPY database-import/drop-tables.sh /drop-tables.sh
+COPY database-import/drop-tables.sql /drop-tables.sql
+RUN chmod +x /drop-tables.sh
 
 # Create import script
 RUN echo '#!/bin/bash\n\
 echo "🚀 Starting database import..."\n\
+echo "Deployment triggered at $(date)"\n\
 sleep 5\n\
 \n\
 # Try using MYSQL_PRIVATE_URL if available\n\
@@ -27,13 +30,13 @@ if [ -n "$MYSQL_PRIVATE_URL" ]; then\n\
   DB="${PORT_DB#*/}"\n\
   echo "Connecting as $USER to $HOST:$PORT/$DB"\n\
   echo "Dropping existing tables first..."\n\
-  mysql -h "$HOST" -P "$PORT" -u "$USER" -p"$PASS" "$DB" < /tmp/drop-tables.sql 2>&1 || echo "No tables to drop or error"\n\
+  /drop-tables.sh "$HOST" "$PORT" "$USER" "$PASS" "$DB" 2>&1 || echo "No tables to drop"\n\
   echo "Importing database..."\n\
   mysql -h "$HOST" -P "$PORT" -u "$USER" -p"$PASS" "$DB" < /tmp/import.sql\n\
 elif [ -n "$MYSQL_ROOT_PASSWORD" ]; then\n\
   echo "Using MYSQL_ROOT_PASSWORD..."\n\
   echo "Dropping existing tables first..."\n\
-  mysql -h mysql.railway.internal -P 3306 -u root -p"$MYSQL_ROOT_PASSWORD" railway < /tmp/drop-tables.sql 2>&1 || echo "No tables to drop or error"\n\
+  /drop-tables.sh mysql.railway.internal 3306 root "$MYSQL_ROOT_PASSWORD" railway 2>&1 || echo "No tables to drop"\n\
   echo "Importing database..."\n\
   mysql -h mysql.railway.internal -P 3306 -u root -p"$MYSQL_ROOT_PASSWORD" railway < /tmp/import.sql\n\
 else\n\
