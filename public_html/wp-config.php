@@ -20,17 +20,32 @@
  */
 
 // ** Database settings - Railway MySQL ** //
+// Use environment variables if available, otherwise fall back to defaults
 /** The name of the database for WordPress */
-define( 'DB_NAME', 'railway' );
+define( 'DB_NAME', getenv('WORDPRESS_DB_NAME') ?: getenv('MYSQLDATABASE') ?: 'railway' );
 
 /** Database username */
-define( 'DB_USER', 'root' );
+define( 'DB_USER', getenv('WORDPRESS_DB_USER') ?: getenv('MYSQLUSER') ?: 'root' );
 
 /** Database password */
-define( 'DB_PASSWORD', 'EAEAuwZrDfldCsVlILORIlRNrUqjTIPT' );
+define( 'DB_PASSWORD', getenv('WORDPRESS_DB_PASSWORD') ?: getenv('MYSQL_ROOT_PASSWORD') ?: getenv('MYSQLPASSWORD') ?: 'EAEAuwZrDfldCsVlILORIlRNrUqjTIPT' );
 
 /** Database hostname - Railway internal network */
-define( 'DB_HOST', 'mysql.railway.internal:3306' );
+// Extract host and port from MYSQL_PRIVATE_URL if available
+$db_host = 'mysql.railway.internal:3306';
+if (getenv('MYSQL_PRIVATE_URL')) {
+    $url = parse_url(getenv('MYSQL_PRIVATE_URL'));
+    if ($url && isset($url['host'])) {
+        $port = isset($url['port']) ? $url['port'] : 3306;
+        $db_host = $url['host'] . ':' . $port;
+    }
+} elseif (getenv('WORDPRESS_DB_HOST')) {
+    $db_host = getenv('WORDPRESS_DB_HOST');
+} elseif (getenv('MYSQLHOST')) {
+    $port = getenv('MYSQLPORT') ?: 3306;
+    $db_host = getenv('MYSQLHOST') . ':' . $port;
+}
+define( 'DB_HOST', $db_host );
 
 /** Database charset to use in creating database tables. */
 define( 'DB_CHARSET', 'utf8' );
