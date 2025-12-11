@@ -9,21 +9,36 @@ COPY database/dbxgdxdldly759.sql /tmp/import.sql
 # Create import script
 RUN echo '#!/bin/bash\n\
 echo "🚀 Starting database import..."\n\
-echo "Connecting to MySQL at mysql.railway.internal:3306"\n\
-echo "Password set: ${MYSQL_ROOT_PASSWORD:+YES}"\n\
 sleep 5\n\
-mysql -h mysql.railway.internal \\\n\
-      -P 3306 \\\n\
-      -u root \\\n\
-      -p"${MYSQL_ROOT_PASSWORD:-EAEAuwZrDfldCsVlILORIlRNrUqjTIPT}" \\\n\
-      railway < /tmp/import.sql\n\
+\n\
+# Try using MYSQL_PRIVATE_URL if available\n\
+if [ -n "$MYSQL_PRIVATE_URL" ]; then\n\
+  echo "Using MYSQL_PRIVATE_URL connection..."\n\
+  # Extract components from URL\n\
+  MYSQL_URL="${MYSQL_PRIVATE_URL#mysql://}"\n\
+  USER_PASS="${MYSQL_URL%%@*}"\n\
+  HOST_DB="${MYSQL_URL#*@}"\n\
+  USER="${USER_PASS%%:*}"\n\
+  PASS="${USER_PASS#*:}"\n\
+  HOST="${HOST_DB%%:*}"\n\
+  PORT_DB="${HOST_DB#*:}"\n\
+  PORT="${PORT_DB%%/*}"\n\
+  DB="${PORT_DB#*/}"\n\
+  echo "Connecting as $USER to $HOST:$PORT/$DB"\n\
+  mysql -h "$HOST" -P "$PORT" -u "$USER" -p"$PASS" "$DB" < /tmp/import.sql\n\
+elif [ -n "$MYSQL_ROOT_PASSWORD" ]; then\n\
+  echo "Using MYSQL_ROOT_PASSWORD..."\n\
+  mysql -h mysql.railway.internal -P 3306 -u root -p"$MYSQL_ROOT_PASSWORD" railway < /tmp/import.sql\n\
+else\n\
+  echo "No MySQL credentials found!"\n\
+  exit 1\n\
+fi\n\
+\n\
 if [ $? -eq 0 ]; then\n\
   echo "✅ Database imported successfully!"\n\
   echo "You can now delete this import service."\n\
 else\n\
   echo "❌ Import failed!"\n\
-  echo "Trying alternative connection..."\n\
-  mysql -h mysql.railway.internal -P 3306 -u root -p"${MYSQL_ROOT_PASSWORD:-EAEAuwZrDfldCsVlILORIlRNrUqjTIPT}" -e "SELECT 1;" 2>&1\n\
   exit 1\n\
 fi\n\
 sleep 3600\n\
