@@ -1,0 +1,14 @@
+FROM mysql:8.0
+
+# Copy the SQL file
+COPY database/dbxgdxdldly759.sql /docker-entrypoint-initdb.d/
+
+# Set environment variables (Railway will provide these)
+ENV MYSQL_HOST=mariadb.railway.internal
+ENV MYSQL_USER=railway
+ENV MYSQL_PASSWORD=ZPEMEUSSLV51Mqbf*zzsHVdwMCKk6p-n
+ENV MYSQL_DATABASE=railway
+
+# This container will import on startup
+CMD ["sh", "-c", "mysql -h $MYSQL_HOST -u $MYSQL_USER -p$MYSQL_PASSWORD $MYSQL_DATABASE < /docker-entrypoint-initdb.d/dbxgdxdldly759.sql && echo 'Import complete' && sleep infinity"]
+
