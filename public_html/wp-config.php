@@ -29,8 +29,14 @@ define( 'DB_USER', 'root' );
 /** Database password */
 define( 'DB_PASSWORD', 'EAEAuwZrDfldCsVlILoRIlRNrUqjTIPT' );
 
-/** Database hostname - Railway internal network */
-define( 'DB_HOST', 'mysql.railway.internal:3306' );
+/** Database hostname - Railway MySQL service */
+define( 'DB_HOST', 'tramway.proxy.rlwy.net:24429' );
+
+/** Show database connection errors */
+define( 'WP_DEBUG', true );
+define( 'WP_DEBUG_DISPLAY', true );
+define( 'WP_DEBUG_LOG', true );
+@ini_set( 'display_errors', 1 );
 
 /** Database charset to use in creating database tables. */
 define( 'DB_CHARSET', 'utf8' );
