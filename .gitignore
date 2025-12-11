@@ -1,0 +1,41 @@
+# Ignore everything in public_html except wp-content
+public_html/*
+!public_html/wp-content/
+
+# Within wp-content, exclude uploads and generated content
+public_html/wp-content/uploads/
+public_html/wp-content/upgrade/
+public_html/wp-content/upgrade-temp-backup/
+public_html/wp-content/backup-db/
+public_html/wp-content/backups/
+public_html/wp-content/cache/
+public_html/wp-content/debug.log
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*~
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temporary files
+*.tmp
+*.temp
+
+# Error logs
+*.log
+php_errorlog
+error_log
+
+# Sensitive files
+public_html/wp-content/sgs_encrypt_key.php
+
