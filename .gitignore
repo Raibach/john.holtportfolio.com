@@ -1,6 +1,11 @@
-# Ignore everything in public_html except wp-content
+# Ignore everything in public_html except wp-content and essential WordPress files
 public_html/*
 !public_html/wp-content/
+!public_html/wp-config.php
+!public_html/index.php
+!public_html/wp-load.php
+!public_html/wp-blog-header.php
+!public_html/.htaccess
 
 # Within wp-content, exclude generated content but include uploads
 public_html/wp-content/upgrade/
