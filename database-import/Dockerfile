@@ -3,8 +3,9 @@ FROM debian:bullseye-slim
 # Install mysql client
 RUN apt-get update && apt-get install -y default-mysql-client && rm -rf /var/lib/apt/lists/*
 
-# Copy SQL file from repository
+# Copy SQL files from repository
 COPY database/dbxgdxdldly759.sql /tmp/import.sql
+COPY database-import/drop-tables.sql /tmp/drop-tables.sql
 
 # Create import script
 RUN echo '#!/bin/bash\n\
@@ -26,39 +27,13 @@ if [ -n "$MYSQL_PRIVATE_URL" ]; then\n\
   DB="${PORT_DB#*/}"\n\
   echo "Connecting as $USER to $HOST:$PORT/$DB"\n\
   echo "Dropping existing tables first..."\n\
-  mysql -h "$HOST" -P "$PORT" -u "$USER" -p"$PASS" "$DB" <<'EOSQL'\n\
-SET FOREIGN_KEY_CHECKS=0;\n\
-SET @tables = NULL;\n\
-SELECT GROUP_CONCAT(CONCAT('DROP TABLE IF EXISTS \\\`', table_name, '\\\`')) INTO @tables\n\
-FROM information_schema.tables\n\
-WHERE table_schema = '$DB';\n\
-SET @tables = IFNULL(@tables, '');\n\
-SET @tables = IF(@tables != '', @tables, 'SELECT 1');\n\
-PREPARE stmt FROM @tables;\n\
-EXECUTE stmt;\n\
-DEALLOCATE PREPARE stmt;\n\
-SET FOREIGN_KEY_CHECKS=1;\n\
-EOSQL\n\
-  echo "Tables dropped (or none existed)"\n\
+  mysql -h "$HOST" -P "$PORT" -u "$USER" -p"$PASS" "$DB" < /tmp/drop-tables.sql 2>&1 || echo "No tables to drop or error"\n\
   echo "Importing database..."\n\
   mysql -h "$HOST" -P "$PORT" -u "$USER" -p"$PASS" "$DB" < /tmp/import.sql\n\
 elif [ -n "$MYSQL_ROOT_PASSWORD" ]; then\n\
   echo "Using MYSQL_ROOT_PASSWORD..."\n\
   echo "Dropping existing tables first..."\n\
-  mysql -h mysql.railway.internal -P 3306 -u root -p"$MYSQL_ROOT_PASSWORD" railway <<'EOSQL'\n\
-SET FOREIGN_KEY_CHECKS=0;\n\
-SET @tables = NULL;\n\
-SELECT GROUP_CONCAT(CONCAT('DROP TABLE IF EXISTS \\\`', table_name, '\\\`')) INTO @tables\n\
-FROM information_schema.tables\n\
-WHERE table_schema = 'railway';\n\
-SET @tables = IFNULL(@tables, '');\n\
-SET @tables = IF(@tables != '', @tables, 'SELECT 1');\n\
-PREPARE stmt FROM @tables;\n\
-EXECUTE stmt;\n\
-DEALLOCATE PREPARE stmt;\n\
-SET FOREIGN_KEY_CHECKS=1;\n\
-EOSQL\n\
-  echo "Tables dropped (or none existed)"\n\
+  mysql -h mysql.railway.internal -P 3306 -u root -p"$MYSQL_ROOT_PASSWORD" railway < /tmp/drop-tables.sql 2>&1 || echo "No tables to drop or error"\n\
   echo "Importing database..."\n\
   mysql -h mysql.railway.internal -P 3306 -u root -p"$MYSQL_ROOT_PASSWORD" railway < /tmp/import.sql\n\
 else\n\
